@@ -1,36 +1,31 @@
-import json
-from datetime import datetime
 from fastapi import APIRouter, Depends, HTTPException
-from sqlalchemy import select
 from sqlalchemy.orm import Session
 from app.database import get_db
-from app.models.models import BomLine, Ingredient, KitchenOrder, OrderLine, PrepRun
-from app.services.bom_engine import explode_and_merge, result_to_dict
+from app.models.models import KitchenOrder
+from app.services.bom_engine import SplitError
+from app.services.prep_service import empty_result, generate_prep, latest_run, latest_payload
+
 router = APIRouter(prefix="/prep", tags=["prep"])
 
 @router.post("/run")
-def run_prep(order_id: int = 1, db: Session = Depends(get_db)):
-    order = db.get(KitchenOrder, order_id)
-    if not order: raise HTTPException(404, "订单不存在")
-    ols = [{"dish_id": l.dish_id, "portions": l.portions}
-           for l in db.scalars(select(OrderLine).where(OrderLine.order_id == order_id)).all()]
-    bom = [{"dish_id": b.dish_id, "ingredient_id": b.ingredient_id, "qty_per_portion": b.qty_per_portion}
-           for b in db.scalars(select(BomLine)).all()]
-    ings = {i.id: {"code": i.code, "name": i.name, "unit": i.unit, "stock_qty": i.stock_qty}
-            for i in db.scalars(select(Ingredient)).all()}
-    result = result_to_dict(explode_and_merge(ols, bom, ings))
-    result["order"] = {"id": order.id, "code": order.code, "outlet": order.outlet}
-    run = PrepRun(order_id=order_id, created_at=datetime.utcnow(), result_json=json.dumps(result, ensure_ascii=False))
-    db.add(run); db.commit(); db.refresh(run)
-    return {"id": run.id, **result}
+def run_prep(order_id: int = 1, force: bool = False, db: Session = Depends(get_db)):
+    try:
+        _run, payload = generate_prep(db, order_id, force=force)
+    except KeyError:
+        raise HTTPException(404, "订单不存在")
+    except SplitError as exc:
+        # 分册原子性失败：三册与占用已全部退回，结存未变。不得写成结存不够。
+        raise HTTPException(409, str(exc) or "分册失败：热厨册/冷荤册/未分册已全部退回，结存未变")
+    return payload
 
 @router.get("/latest")
 def latest(order_id: int = 1, db: Session = Depends(get_db)):
-    run = db.scalars(select(PrepRun).where(PrepRun.order_id == order_id).order_by(PrepRun.id.desc())).first()
-    if not run:
-        return run_prep(order_id=order_id, db=db)
-    data = json.loads(run.result_json)
-    return {"id": run.id, **data}
+    if db.get(KitchenOrder, order_id) is None:
+        raise HTTPException(404, "订单不存在")
+    run = latest_run(db, order_id)
+    if run is None:
+        return empty_result(order_id)
+    return latest_payload(run)
 
 @router.get("/shortages")
 def shortages(order_id: int = 1, db: Session = Depends(get_db)):

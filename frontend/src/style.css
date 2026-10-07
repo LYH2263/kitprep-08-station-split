@@ -169,3 +169,31 @@ th { color: var(--kp-muted); font-weight: 700; font-size: 0.75rem; }
 .stat { font-size: 1.5rem; font-weight: 800; }
 
 .tree ul { list-style: none; padding-left: 1.2rem; margin: 0.25rem 0; }
+
+.kp-error-banner {
+  display: flex; align-items: center; justify-content: space-between; gap: 0.75rem;
+  background: rgba(179,58,43,0.16);
+  border: 2px solid var(--kp-bad);
+  color: #ffd9d2;
+  border-radius: 2px;
+  padding: 0.5rem 0.75rem;
+  margin: 0 0 0.75rem;
+  font-size: 0.85rem; font-weight: 700;
+}
+.kp-error-x {
+  background: none; border: none; color: inherit;
+  font-size: 1.1rem; line-height: 1; cursor: pointer; padding: 0 0.2rem;
+}
+.kp-books { display: flex; flex-direction: column; gap: 0.75rem; }
+.kp-book {
+  border: 2px solid var(--kp-wood);
+  border-radius: 2px; padding: 0.55rem 0.7rem;
+  background: rgba(255,255,255,0.35);
+}
+.kp-book h3 {
+  margin: 0 0 0.4rem; font-size: 0.88rem;
+  color: var(--kp-wood); letter-spacing: 0.04em;
+}
+.kp-book-empty { font-size: 0.78rem; color: var(--kp-muted); padding: 0.2rem 0; }
+select.kp-station-select, .kp-saved-ok { font-size: 0.8rem; }
+.kp-saved-ok { color: var(--kp-ok); font-weight: 800; margin-left: 0.4rem; }
