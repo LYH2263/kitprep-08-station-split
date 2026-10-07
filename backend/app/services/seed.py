@@ -5,10 +5,10 @@ from app.models.models import BomLine, Dish, Ingredient, KitchenOrder, OrderLine
 def seed_if_empty(db: Session) -> None:
     if (db.scalar(select(func.count()).select_from(Dish)) or 0) > 0:
         return
-    dishes = [("D-HS", "红烧肉套餐"), ("D-YC", "鱼香茄子"), ("D-JT", "鸡汤面")]
+    dishes = [("D-HS", "红烧肉套餐", "hot"), ("D-YC", "鱼香茄子", "cold"), ("D-JT", "鸡汤面", "none")]
     dish_ids = {}
-    for code, name in dishes:
-        d = Dish(code=code, name=name, portion_unit="份")
+    for code, name, station in dishes:
+        d = Dish(code=code, name=name, portion_unit="份", station=station)
         db.add(d); db.flush(); dish_ids[code] = d.id
     ings = [
         ("I-PR", "五花肉", "kg", 8.0),

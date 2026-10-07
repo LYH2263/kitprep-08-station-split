@@ -168,4 +168,10 @@ th { color: var(--kp-muted); font-weight: 700; font-size: 0.75rem; }
 .muted { color: var(--kp-muted); }
 .stat { font-size: 1.5rem; font-weight: 800; }
 
+.kp-book { margin-top: 0.7rem; border: 2px solid rgba(92,61,46,0.45); border-radius: 2px; padding: 0.4rem 0.55rem 0.55rem; background: rgba(255,255,255,0.25); }
+.kp-book-title { margin: 0 0 0.35rem; font-size: 0.82rem; padding: 0.25rem 0.45rem; border-radius: 2px; }
+.kp-book-hot { background: rgba(179,58,43,0.16); color: var(--kp-bad); }
+.kp-book-cold { background: rgba(47,84,107,0.18); color: #2a4f6b; }
+.kp-book-common { background: rgba(106,115,124,0.18); color: var(--kp-steel-dk); }
+
 .tree ul { list-style: none; padding-left: 1.2rem; margin: 0.25rem 0; }
